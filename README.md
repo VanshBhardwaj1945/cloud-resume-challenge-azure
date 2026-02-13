@@ -66,30 +66,30 @@ This project follows the Cloud Resume Challenge guidelines. The challenge requir
 ### HTML
 **What was done**
 
-- Created `index.html` with sections for work experience, education, and skills  
-- Used semantic HTML structure  
+* Created `index.html` with sections for work experience education and skills  
+* Used semantic HTML structure  
+
+**Full source:** [index.html](./frontend/index.html)
 
 **Screenshots**
 
-| Screenshot | Caption |
-|------------|---------|
-| `docs/01-html-index.png` | HTML file structure |
-
+![site preview](docs/01-storage-static-website.png)
 ---
 
 ### CSS
 **What was done**
 
-- Created `style.css` for layout, fonts, and responsive design  
-- Linked CSS file to HTML  
+* Created `style.css` for layout fonts and responsive design  
+* Linked CSS file to HTML  
+
+**Full source:** [style.css](./frontend/style.css)
 
 **Screenshots**
 
 | Screenshot | Caption |
 |------------|---------|
-| `docs/02-css-style.png` | CSS styling applied |
-
----
+| `docs/02-frontdoor-origin-group.png` | Front Door origin configuration |
+| `docs/05-https-works.png` | HTTPS verification screenshot |
 
 ## Static Website and Front Door CDN Setup
 
