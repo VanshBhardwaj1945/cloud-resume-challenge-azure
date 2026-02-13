@@ -2,21 +2,26 @@
 
 ## Table of Contents
 1. [Overview](#overview)
-2. [Tech Stack and Tools](#tech-stack-and-tools)
-3. [Frontend](#frontend)
+2. [Resume Challenge Directions](#resume-challenge-directions)
+3. [Tech Stack and Tools](#tech-stack-and-tools)
+4. [Frontend](#frontend)
    - [HTML](#html)
    - [CSS](#css)
-4. [Static Website and Front Door CDN Setup](#static-website-and-front-door-cdn-setup)
+5. [Static Website and Front Door CDN Setup](#static-website-and-front-door-cdn-setup)
    - [Deploying Static Website](#deploying-static-website)
    - [Configuring Azure Front Door](#configuring-azure-front-door)
-5. [Custom Domain HTTPS and Cloudflare DNS Setup](#custom-domain-https-and-cloudflare-dns-setup)
-6. [Next Steps](#next-steps)
-7. [Live Site](#live-site)
+6. [Custom Domain HTTPS and Cloudflare DNS Setup](#custom-domain-https-and-cloudflare-dns-setup)
+7. [Next Steps](#next-steps)
 
 ---
 
 ## Overview
+
 This project is a personal cloud hosted resume built with Azure Storage Static Website, Azure Front Door, and a custom domain.
+
+**Live Website:**  
+
+https://resume.vanshbhardwaj.com
 
 It demonstrates the following skills:
 
@@ -24,6 +29,21 @@ It demonstrates the following skills:
 - Cloud hosting and CDN configuration  
 - Custom domain setup with HTTPS  
 - DNS management using Cloudflare  
+ 
+
+---
+
+#
+
+## Resume Challenge Directions
+This project follows the Cloud Resume Challenge guidelines. The challenge requires building and deploying a cloud hosted resume that demonstrates real world cloud engineering skills including:
+
+- Hosting a static website in the cloud  
+- Using a CDN for global distribution  
+- Configuring a custom domain  
+- Enabling HTTPS  
+- Managing DNS records  
+- Demonstrating infrastructure understanding  
 
 ---
 
@@ -100,8 +120,3 @@ It demonstrates the following skills:
 - Add analytics  
 - Improve accessibility  
 - Add resume download option  
-
----
-
-## Live Site
-Add your production domain here once configured.
