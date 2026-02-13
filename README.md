@@ -1,2 +1,26 @@
-# cloud-resume-challenge-azure
-A project where I build my resume as a live website on Azure, add a visitor counter with a database and API, secure it with HTTPS, connect a custom domain, and set up CI/CD to deepen my understanding of cloud tools while having fun and practicing.
+# Cloud Resume Challenge – Azure
+
+## What’s Done (Frontend)
+✅ Static website deployed to Azure Storage  
+✅ Azure Front Door configured for global CDN  
+✅ Custom domain with HTTPS (resume.vanshbhardwaj.com)  
+✅ Cloudflare DNS setup  
+
+## Live Site
+👉 https://resume.vanshbhardwaj.com
+
+## Screenshots
+See the docs folder:
+
+- `01-storage-static-website.png` – Static site setup
+- `02-frontdoor-origin-group.png` – CDN origin
+- `03-frontdoor-route-settings.png` – HTTPS routing
+- `04-custom-domain-validation.png` – DNS validation
+- `05-https-works.png` – Live HTTPS site
+
+## Next Steps
+- Javascript visitor counter  
+- Azure Functions API + Cosmos DB  
+- Python backend + tests  
+- ARM template IaC  
+- CI/CD via GitHub Actions
