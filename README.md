@@ -2,7 +2,7 @@
 
 ## Table of Contents
 1. [Overview](#overview)
-2. [Resume Challenge Directions](#resume-challenge-directions)
+2. [What-is-the-cloud-resume-challenge?](#what-is-the-cloud-resume-challenge?)
 3. [Tech Stack and Tools](#tech-stack-and-tools)
 4. [Frontend](#frontend)
    - [HTML](#html)
@@ -35,7 +35,7 @@ It demonstrates the following skills:
 
 #
 
-## Resume Challenge Directions
+## What is the cloud resume challenge?
 This project follows the Cloud Resume Challenge guidelines. The challenge requires building and deploying a cloud hosted resume that demonstrates real world cloud engineering skills including:
 
 - Hosting a static website in the cloud  
@@ -43,7 +43,10 @@ This project follows the Cloud Resume Challenge guidelines. The challenge requir
 - Configuring a custom domain  
 - Enabling HTTPS  
 - Managing DNS records  
-- Demonstrating infrastructure understanding  
+- Demonstrating infrastructure understanding
+
+You can find the link to the instructions here: 
+https://cloudresumechallenge.dev/docs/the-challenge/azure/
 
 ---
 
@@ -67,13 +70,9 @@ This project follows the Cloud Resume Challenge guidelines. The challenge requir
 **What was done**
 
 * Created `index.html` with sections for work experience education and skills  
-* Used semantic HTML structure  
 
 **Full source:** [index.html](./frontend/index.html)
 
-**Screenshots**
-
-![site preview](docs/01-storage-static-website.png)
 ---
 
 ### CSS
@@ -84,7 +83,15 @@ This project follows the Cloud Resume Challenge guidelines. The challenge requir
 
 **Full source:** [style.css](./frontend/style.css)
 
+<figure>
+   <img src="docs/01-storage-static-website.png" width="600">
+  <figcaption>
+    Preview of website
+  </figcaption>
+</figure>
+
 **Screenshots**
+
 
 | Screenshot | Caption |
 |------------|---------|
