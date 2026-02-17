@@ -1,24 +1,25 @@
 # Cloud Resume Challenge Azure
 
 ## Table of Contents
-1. [Overview](#overview)  
-2. [What-is-the-cloud-resume-challenge?](#what-is-the-cloud-resume-challenge?)  
-3. [Tech Stack and Tools](#tech-stack-and-tools)  
-4. [Frontend](#frontend)  
-   4.1. [HTML](#html)  
-   - [CSS](#css)  
-5. [Static Website and Front Door CDN Setup](#static-website-and-front-door-cdn-setup)  
-   - [Deploying Static Website](#deploying-static-website)  
-   - [Configuring Azure Front Door](#configuring-azure-front-door)  
-6. [Custom Domain HTTPS and Cloudflare DNS Setup](#custom-domain-https-and-cloudflare-dns-setup)  
-7. [Setting up Visitor Count via API and Database](#setting-up-visitor-count-via-api-and-database)  
-   - [7.1 Creating the Database (Cosmos DB)](#71-creating-the-database-cosmos-db)  
-   - [7.2 Creating and Deploying the API with Azure Functions](#72-creating-and-deploying-the-api-with-azure-functions)  
-     - [7.2.1 Creating the Azure Function Project](#721-creating-the-azure-function-project)  
-     - [7.2.2 Testing the Function Locally](#722-testing-the-function-locally)  
-     - [7.2.3 Deploying to Azure Function apps](#723-deploying-to-azure-function-apps)  
-   - [7.3 Connecting the Frontend](#73-connecting-the-frontend)  
+1. [Overview](#overview)
+2. [What-is-the-cloud-resume-challenge?](#what-is-the-cloud-resume-challenge)
+3. [Tech Stack and Tools](#tech-stack-and-tools)
+4. [Frontend](#frontend)
+   - [HTML](#html)
+   - [CSS](#css)
+5. [Static Website and Front Door CDN Setup](#static-website-and-front-door-cdn-setup)
+   - [Deploying Static Website](#deploying-static-website)
+   - [Configuring Azure Front Door](#configuring-azure-front-door)
+6. [Custom Domain HTTPS and Cloudflare DNS Setup](#custom-domain-https-and-cloudflare-dns-setup)
+7. [Setting up Visitor Count via API and Database](#setting-up-visitor-count-via-api-and-database)
+   - [Creating the Database (Cosmos DB)](#71-creating-the-database-cosmos-db)
+   - [Creating and Deploying the API with Azure Functions](#72-creating-and-deploying-the-api-with-azure-functions)
+     - [Creating the Azure Function Project](#721-creating-the-azure-function-project)
+     - [Testing the Function Locally](#722-testing-the-function-locally)
+     - [Deploying to Azure Function apps](#723-deploying-to-azure-function-apps)
+   - [Connecting the Frontend](#73-connecting-the-frontend)
 8. [Next Steps](#next-steps)
+
 
 ---
 
