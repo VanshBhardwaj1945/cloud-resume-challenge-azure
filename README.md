@@ -17,7 +17,7 @@
 
 ## Overview
 
-This project is a personal cloud hosted resume built with Azure Storage Static Website, Azure Front Door, and a custom domain.
+This project is a personal cloud hosted resume built with Azure Storage Static Website, Azure Front Door, and a custom domain. 
 
 **Live Website:**  
 
@@ -61,12 +61,13 @@ https://cloudresumechallenge.dev/docs/the-challenge/azure/
 | Cloudflare | DNS management |
 | AFD Managed SSL Certificate | Enable secure HTTPS traffic |
 | curl or Browser | Verify site availability |
-
+| github / git | CI/CD workflows|
 ---
 
 ## Frontend
 
 ### HTML
+
 **What was done**
 
 * Created `index.html` with sections for work experience education and skills  
@@ -107,18 +108,33 @@ https://cloudresumechallenge.dev/docs/the-challenge/azure/
 - Verified static endpoint  
 
 ### Configuring Azure Front Door
-- Created Front Door profile  
-- Added storage endpoint as origin  
-- Configured routing  
-- Enabled managed HTTPS certificate  
+
+Originally, the challenge suggested using a CDN to improve performance, set up a custom domain, and ensure the site only used HTTPS. As of late 2025, that option was replaced with **Azure Front Door**, which provides a smarter, global way to route traffic. Front Door not only speeds up content delivery like a CDN but also adds advanced routing, security, and high availability across regions, making your site more reliable. I first started by configuring Front Door and turning on HTTPS for secure connections.
+
+**Steps taken:**
+1. Created an Azure Front Door profile
+2. Added the storage account endpoint as the origin
+3. Configured routing and origin groups
+4.  Enabled HTTPS for secure connections
+
+> Routing the static website through Front Door required some trial and error. I spent time understanding how endpoints, origin groups, and routing rules interacted, which was a bit confusing at first. After testing different configurations and identifying misconfigurations, I was able to get the routing working correctly. Finally, traffic flowed smoothly through Front Door, with HTTPS enabled and all static content delivered reliably across regions.
+
 
 ---
 
 ## Custom Domain HTTPS and Cloudflare DNS Setup
-- Added custom domain in Azure Front Door  
+
+Now, the project recommends using Azure to create a custom domain, but I chose to use Cloudflare instead. This allowed me to protect my DNS setup from potential spoofing or “man-in-the-middle” attacks by enabling DNSSEC, adding an extra layer of security for my domain. 
+
+- Bought a custom domain through cloudfare
+- Added custom domain in Azure Front Door
+- Added the TXT record in Cloudflare to verify domain ownership
 - Configured CNAME in Cloudflare  
-- Verified domain ownership  
-- Enabled HTTPS  
+- Verified domain ownership
+- Made sure HHTPS was Enabled
+- Configured DNSSEC
+
+> Rout
 
 ---
 
