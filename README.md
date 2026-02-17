@@ -14,11 +14,17 @@
 7. [Setting up Visitor Count via API and Database](#setting-up-visitor-count-via-api-and-database)
    - [Creating the Database (Cosmos DB)](#71-creating-the-database-cosmos-db)
    - [Creating and Deploying the API with Azure Functions](#72-creating-and-deploying-the-api-with-azure-functions)
-     - [Creating the Azure Function Project](#721-creating-the-azure-function-project)
-     - [Testing the Function Locally](#722-testing-the-function-locally)
-     - [Deploying to Azure Function apps](#723-deploying-to-azure-function-apps)
-   - [Connecting the Frontend](#73-connecting-the-frontend)
-8. [Next Steps](#next-steps)
+     - [Creating the Azure Function Project](#creating-the-azure-function-project)
+     - [Testing the Function Locally](#testing-the-function-locally)
+     - [Deploying to Azure Function apps](#deploying-to-azure-function-apps)
+   - [Connecting the Frontend](#connecting-the-frontend)
+8. [Creating our CI/CD Workflow](#creating-our-CI/CD-workflow)
+     - [Creating out Frontend workflow](#creating-our-frontend-workflow)
+     - [Implementing Unit Testing](#creating-our-frontend-workflow)
+     - [Creating out Backend workflow](#creating-our-backend-workflow)
+
+
+10. [Next Steps](#next-steps)
 
 
 ---
@@ -262,7 +268,48 @@ fetch('https://<your-function-app>.azurewebsites.net/api/getResumeCounter?code=<
 3. Uploaded the updated HTML and JS files to the Azure Static Website storage.
 4. Verified that visiting the site through the custom domain correctly loads the API and displays the visitor count.
 
-   
+## Creating our CI/CD Workflow
+
+Up until this point, I had been uploading and updating everything manually. For this step, I created a GitHub Actions workflow and configured a Service Principal so GitHub could securely authenticate with Azure and deploy the site automatically. Instead of hardcoding credentials, I stored them as encrypted GitHub secrets and used them in the workflow file. Now, whenever I push changes to the repository, the website updates on its own — which felt like a big shift from manual uploads to a more real-world, automated deployment process.
+
+### Creating our frontend workflow
+
+This section focuses on automating the deployment of the frontend using GitHub Actions as part of the larger CI/CD pipeline.
+
+In this step, I worked on:
+
+- **Version Control** – All frontend code is stored and tracked in GitHub, allowing structured commits and change history.
+- **Continuous Integration (CI)** – Every push to the repository automatically triggers the GitHub Actions workflow.
+- **Continuous Deployment (CD)** – Once the workflow runs successfully, the updated static website files are automatically deployed to Azure Storage without manual intervention.
+
+By setting up this workflow, I transitioned from manually uploading files through the Azure portal to an automated, production-style deployment process. Now, every code change pushed to the repository is automatically built and deployed, making the process more reliable, repeatable, and scalable.
+
+**Steps taken**
+1. Created a new GitHub repository for the project.  
+2. Reviewed all `.gitignore` files and added a root-level `.gitignore` to ensure no sensitive or unnecessary files were committed.  
+3. Created a workflow file at `.github/workflows/frontend-main.yaml`.  
+4. Created a Service Principal and assigned it the **Contributor** role using RBAC:
+```bash
+az ad sp create-for-rbac --name "AzureResumeACG" --role contributor --scopes /subscriptions/****-****-****-**** --sdk-auth
+```
+5. Stored the generated credentials as encrypted GitHub Secrets.
+6. Used the Microsoft GitHub Actions template as a base and modified the YAML file to match my architecture and storage setup.
+7. Pushed the code to the repository to trigger the workflow.
+
+> *While doing this I had problems with the template woflow code given by microsoft here:
+> https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-static-site-github-actions?tabs=userlevel
+> Although the workflow was triggering correctly, the deployment to Azure Static Website storage was failing. After troubleshooting and reviewing the GitHub Actions logs, I found the following error:*
+> ```git
+> ERROR: The specified blob already exists.
+> RequestId:ad9764e0-501e-0051-15d3-9f4098000000
+> ErrorCode:BlobAlreadyExists
+> If you want to overwrite the existing one, please add --overwrite in your command.
+> ```
+> *After revisiting the documentation, I added the ```--overwrite```flag in the workflow configuration. Once updated, the deployment worked successfully and the site began updating automatically on each push.*
+### Implementing Unit Testing 
+
+### Creating our frontend workflow
+
 ## Next Steps
 - Add CI/CD pipeline  
 - Add analytics  
