@@ -61,12 +61,17 @@ You can find the instructions here:
 |--------------------|---------|
 | HTML | Structure static resume content |
 | CSS | Styling and layout |
-| :contentReference[oaicite:1]{index=1} Storage Static Website | Host static frontend files |
-| :contentReference[oaicite:2]{index=2} Standard | CDN routing and HTTPS termination |
-| :contentReference[oaicite:3]{index=3} | DNS management |
+| JavaScript | Frontend logic and API calls |
+| Azure Storage Static Website | Host static frontend files |
+| Azure Front Door | Global routing, CDN, and HTTPS termination |
+| Cloudflare | DNS management and DNSSEC |
 | AFD Managed SSL Certificate | Enable secure HTTPS traffic |
-| curl or Browser | Verify site availability |
-| :contentReference[oaicite:4]{index=4} | CI/CD workflows |
+| Azure Cosmos DB | Store and persist visitor count data |
+| Azure Functions (Python) | Serverless API to read and update the database |
+| Azure Functions Core Tools | Local development and testing of functions |
+| Git and GitHub | Version control and source code management |
+| curl | Test API endpoints and site availability |
+| Web browser | Manual testing and HTTPS verification |
 
 ---
 
@@ -148,7 +153,7 @@ Now, the project recommends using Azure to create a custom domain, but I chose t
 
 ## Setting up Visitor Count via API and Database
 
-this project introduces backend integration by requiring the website to dynamically retrieve and update a visitor count using a database. The goal is to demonstrate a secure, production-style architecture where the frontend does not communicate directly with the database. Instead, requests flow through an API layer.
+This project introduces backend integration by requiring the website to dynamically retrieve and update a visitor count using a database. The goal is to demonstrate a secure, production-style architecture where the frontend does not communicate directly with the database. Instead, requests flow through an API layer. While I have worked with APIs before, I had never actually designed and built my own backend architecture from scratch. Figuring out how the frontend, API, and database should securely communicate with each other was easily one of the most challenging parts of the project, but it was also one of the most rewarding because it made everything finally click.
 
 The project specifically requires:
 - A database to store the visitor count
@@ -163,7 +168,7 @@ This design keeps database credentials secure, enforces controlled access to dat
 
 ---
 
-### 7.1 Creating the Database (Cosmos DB)
+### Creating the Database (Cosmos DB)
 
 I used serverless Cosmos DB to create the database for storing visitor counts.
 
@@ -183,7 +188,7 @@ This document represents the current visitor count. Each time the API is called,
 
 Using Cosmos DB allows for globally scalable, low-latency storage while maintaining a simple document structure.
 
-### 7.2 Creating and Deploying the API with Azure Functions
+### Creating and Deploying the API with Azure Functions
 
 The project explicitly requires that the frontend must not communicate directly with Cosmos DB. Instead, an API layer must handle all database operations.
 
@@ -195,7 +200,7 @@ The API layer is critical for security and architecture best practices:
 - Encapsulates business logic in the backend
 - Enables future scalability and maintainability
 
-#### 7.2.1 Creating the Azure Function Project
+### Creating the Azure Function Project
 
 I created a new Azure Function project in: `resume-challenge/backend/api/` using the HTTP trigger template.
 
@@ -210,8 +215,9 @@ I created a new Azure Function project in: `resume-challenge/backend/api/` using
    - Return the updated count as JSON  
 4. Verified that `.gitignore` excluded sensitive files like `local.settings.json` and the `.venv` folder.
 
-   
-#### 7.2.2 Testing the Function Locally
+> *Although I have a strong background in Python, working with the ```python azure.functions ``` framework felt almost like learning Python in a new context. I had never used Azure Functions before, so understanding how decorators, triggers, and bindings worked within the Azure environment required a shift in mindset. I relied on Microsoft’s official documentation as a primary reference, along with additional research to better understand how everything fit together. Working with JSON was more familiar, but it still required careful thought to structure responses correctly and ensure the API returned clean, usable data to the frontend.*
+
+###  Testing the Function Locally
 
 Before connecting the frontend, I tested the Azure Function locally to make sure it correctly incremented and returned the visitor count from Cosmos DB.
 
@@ -226,7 +232,7 @@ func host start
    - Worked without errors or exceptions
 3. Confirmed that the function logic was correct and ready to be deployed to Azure.
 
-#### 7.2.3 Deploying to Azure Function apps
+### Deploying to Azure Function apps
 
 After confirming the function worked locally, I deployed the Azure Function to the cloud and configured it to work securely with the frontend and Cosmos DB.
 
@@ -239,7 +245,7 @@ After confirming the function worked locally, I deployed the Azure Function to t
    - Added the custom domain `resume.vanshbhardwaj.com` as an allowed origin  
 5. Verified that the deployed function could access Cosmos DB and respond to HTTP requests correctly.
 
-#### 7.3 Connecting the Frontend
+### Connecting the Frontend
 With the Azure Function API deployed, I updated the frontend JavaScript to fetch the visitor count and display it on the website.
 
 **Steps taken:**
