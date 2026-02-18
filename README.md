@@ -308,7 +308,53 @@ az ad sp create-for-rbac --name "AzureResumeACG" --role contributor --scopes /su
 > *After revisiting the documentation, I added the ```--overwrite```flag in the workflow configuration. Once updated, the deployment worked successfully and the site began updating automatically on each push.*
 ### Implementing Unit Testing 
 
+While I had done some basic unit testing in my college courses, applying it to a live API was a completely different beast. This was easily the most challenging part of the entire project. The goal was to ensure that my Python logic—specifically the part that increments the visitor counter—worked perfectly before it ever touched my production database. To do this without actually writing "fake" data to Cosmos DB every time I ran a test, I had to learn the concept of Mocking. This allows the test to simulate a database response, ensuring the code logic is sound in a controlled environment.
+
+
+**Steps taken:**
+1. **Project Structure:** Created a `/tests` directory and added `__init__.py` to treat the folder as a package, along with `test_function.py` for the actual test cases.
+2. **Environment Setup:** Configured a Python virtual environment `.venv` within the `/api` folder to keep dependencies isolated and manageable.
+3. **Dependency Management:** Installed pytest and added it to the requirements.txt file to ensure the testing framework was available both locally and in the GitHub Actions runner.
+4. **Writing the Tests:** Developed test cases that "mocked" the Azure Cosmos DB and Azure Functions libraries. Since the official documentation was a bit dense, I used AI to help me identify the specific objects within the Azure SDK that needed to be mocked.
+6. **Manual Verification:** Ran the suite locally to ensure a 100% pass rate before attempting to automate the process.
+```bash 
+source api/.venv/bin/activate
+python -m pytest tests
+```
+
+>*Mocking was the "brick wall" of this challenge. Digging through the Azure Cosmos DB and Functions libraries was tough, and I eventually used AI to help me bridge the gap on the specific syntax needed to mock the database client. It was a huge "aha!" moment when the tests finally passed, and it taught me how crucial it is to have a testable architecture..*
+
 ### Creating our frontend workflow
+
+With the API working and the tests passing locally, the final step was to automate the backend deployment. I wanted a true CI/CD (Continuous Integration/Continuous Deployment) pipeline: whenever I push code, GitHub should automatically run my unit tests (CI) and, if they pass, deploy the updated function to Azure (CD). This ensures that I never accidentally "break" the live resume with a bad update.
+
+**Steps taken:**
+1. Workflow Configuration: Created .github/workflows/backend-main.yaml using a standard Microsoft Azure Functions template as the foundation.
+2. Integrating CI (Testing): Added a specific step in the `YAML` file to set up the Python environment, install requirements, and run pytest before any deployment happens.
+
+```yaml
+    - name: Run Unit Tests
+      shell: bash
+      run: |
+        cd backend/api
+        python -m venv .venv
+        source .venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        cd ..
+        python -m pytest tests -v
+```
+
+4. Security & Authentication: Configured an Azure Login action using a Service Principal and GitHub Secrets to allow GitHub to securely talk to my Azure subscription.
+
+```yaml
+    - name: 'Login via AzureCLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+```
+
+6. Deployment: SSet up the final step to push the validated code to the Azure Function App only after tests passed.
 
 ## Next Steps
 - Add CI/CD pipeline  
