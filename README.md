@@ -22,42 +22,40 @@
      - [Creating out Frontend workflow](#creating-our-frontend-workflow)
      - [Implementing Unit Testing](#creating-our-frontend-workflow)
      - [Creating out Backend workflow](#creating-our-backend-workflow)
-
-
-10. [Next Steps](#next-steps)
+9. [Next Steps](#next-steps)
 
 
 ---
 
 ## Overview
 
-This project is a personal cloud-hosted resume built with Azure Storage Static Website, Azure Front Door, and a custom domain.  
+This project is my personal cloud-hosted resume. It’s a simple static website served globally via Azure Front Door, with a small serverless API that keeps track of visitor counts. The goal was to learn real-world cloud deployment while keeping everything automated and secure.
 
-**Live Website:**  
-[https://resume.vanshbhardwaj.com](https://resume.vanshbhardwaj.com)
 
-It demonstrates the following skills:
+**Live Website:**   [https://resume.vanshbhardwaj.com](https://resume.vanshbhardwaj.com)
 
-- Frontend development with HTML and CSS  
-- Cloud hosting and CDN configuration  
-- Custom domain setup with HTTPS  
-- DNS management using Cloudflare  
+Skills demonstrated in this project:
+
+- Frontend development with HTML, CSS, and a bit of JavaScript
+- Hosting a static site in the cloud with Azure Storage
+- Global content delivery via Azure Front Door
+- Custom domain setup with HTTPS and Cloudflare DNS management
+- Serverless API with Azure Functions to safely handle backend data
+- CI/CD automation with GitHub Actions
+- Demonstrating infrastructure understanding
 
 ---
 
 ## What is the Cloud Resume Challenge?
 
-This project follows the Cloud Resume Challenge guidelines. The challenge requires building and deploying a cloud-hosted resume that demonstrates real-world cloud engineering skills including:
+The Cloud Resume Challenge is a small, practical project designed to teach the basics of deploying a real cloud application: a static resume site served from the edge plus a tiny backend for a visitor counter. It’s a great checklist to force you to think about hosting, DNS, HTTPS, a serverless API, and automated deploys — all the parts that matter in real-world cloud work.
 
-- Hosting a static website in the cloud  
-- Using a CDN for global distribution  
-- Configuring a custom domain  
-- Enabling HTTPS  
-- Managing DNS records  
-- Demonstrating infrastructure understanding
+**Official challenge instructions:** [https://cloudresumechallenge.dev/docs/the-challenge/azure/](https://cloudresumechallenge.dev)
 
-You can find the instructions here:  
-:contentReference[oaicite:0]{index=0}
+A few quick notes about how I used the challenge here:
+
+- I followed the Azure variant of the guide and then extended it — adding Front Door, Cloudflare DNS, a Python Azure Function, and GitHub Actions for CI/CD.
+- The goal wasn’t just to complete the checklist. It was to make a small, realistic deployment you can iterate on and show to employers.
 
 ---
 
@@ -68,6 +66,9 @@ You can find the instructions here:
 | HTML | Structure static resume content |
 | CSS | Styling and layout |
 | JavaScript | Frontend logic and API calls |
+| Python | Language for backend API |
+| pytest | Run unit tests locally |
+| Azure Portal | Configure and manage Azure resources |
 | Azure Storage Static Website | Host static frontend files |
 | Azure Front Door | Global routing, CDN, and HTTPS termination |
 | Cloudflare | DNS management and DNSSEC |
@@ -125,8 +126,8 @@ Originally, the challenge suggested using a CDN to improve performance, set up a
 
 **Steps taken:**
 1. Created an Azure Front Door profile  
-2. Added the storage account endpoint as the origin  
-3. Configured routing and origin groups  
+2. Added my Azure Storage static website endpoint as an origin.
+3. Created an origin group and routing rules to send traffic for the site hostname to that origin group. 
 4. Enabled HTTPS for secure connections  
 
 > *Routing the static website through Front Door required some trial and error. I spent time understanding how endpoints, origin groups, and routing rules interacted, which was a bit confusing at first. After testing different configurations and fixing misconfigurations, I was able to get the routing working correctly. Traffic now flows smoothly through Front Door, with HTTPS enabled and all static content delivered reliably across regions.*
@@ -159,7 +160,7 @@ Now, the project recommends using Azure to create a custom domain, but I chose t
 
 ## Setting up Visitor Count via API and Database
 
-This project introduces backend integration by requiring the website to dynamically retrieve and update a visitor count using a database. The goal is to demonstrate a secure, production-style architecture where the frontend does not communicate directly with the database. Instead, requests flow through an API layer. While I have worked with APIs before, I had never actually designed and built my own backend architecture from scratch. Figuring out how the frontend, API, and database should securely communicate with each other was easily one of the most challenging parts of the project, but it was also one of the most rewarding because it made everything finally click.
+This project introduces backend integration by requiring the website to retrieve and update a visitor count using a database. While I have worked with APIs before, I had never actually designed and built my own backend architecture from scratch. Figuring out how the frontend, API, and database should securely communicate with each other was easily one of the most challenging parts of the project, but it was also one of the most rewarding because it made everything finally click.
 
 The project specifically requires:
 - A database to store the visitor count
@@ -177,6 +178,7 @@ This design keeps database credentials secure, enforces controlled access to dat
 ### Creating the Database (Cosmos DB)
 
 I used serverless Cosmos DB to create the database for storing visitor counts.
+Using Cosmos DB allows for globally scalable, low-latency storage while maintaining a simple document structure.
 
 **Database name:** `counter`  
 **Container name:** `visitorcount`  
@@ -192,19 +194,10 @@ I used serverless Cosmos DB to create the database for storing visitor counts.
 
 This document represents the current visitor count. Each time the API is called, the count value is incremented and updated.
 
-Using Cosmos DB allows for globally scalable, low-latency storage while maintaining a simple document structure.
-
 ### Creating and Deploying the API with Azure Functions
 
-The project explicitly requires that the frontend must not communicate directly with Cosmos DB. Instead, an API layer must handle all database operations.
-
-To accomplish this, I created a Python based Azure Function with an HTTP trigger.
-
-The API layer is critical for security and architecture best practices:
-- Prevents exposing database keys in frontend JavaScript
-- Allows validation and control over database operations
-- Encapsulates business logic in the backend
-- Enables future scalability and maintainability
+Instead of letting the frontend talk directly to Cosmos DB, I wanted to make the setup more secure and realistic, so I built an API layer to handle all database operations. 
+To do this, I created a Python-based Azure Function with an HTTP trigger..
 
 ### Creating the Azure Function Project
 
@@ -274,15 +267,13 @@ Up until this point, I had been uploading and updating everything manually. For 
 
 ### Creating our frontend workflow
 
-This section focuses on automating the deployment of the frontend using GitHub Actions as part of the larger CI/CD pipeline.
+TThis section automates frontend deployment using GitHub Actions:
 
-In this step, I worked on:
+- **Version Control** – Code tracked in GitHub with structured commits.
+- **CI (Continuous Integration)** – Each push triggers the workflow automatically.
+- **CD (Continuous Deployment)** – Updates deploy to Azure Storage without manual steps.
 
-- **Version Control** – All frontend code is stored and tracked in GitHub, allowing structured commits and change history.
-- **Continuous Integration (CI)** – Every push to the repository automatically triggers the GitHub Actions workflow.
-- **Continuous Deployment (CD)** – Once the workflow runs successfully, the updated static website files are automatically deployed to Azure Storage without manual intervention.
-
-By setting up this workflow, I transitioned from manually uploading files through the Azure portal to an automated, production-style deployment process. Now, every code change pushed to the repository is automatically built and deployed, making the process more reliable, repeatable, and scalable.
+While I had experience being part of a CI/CD workflow, actually creating one from scratch was a different story. This replaced manual uploads with a reliable, repeatable, automated process.
 
 **Steps taken**
 1. Created a new GitHub repository for the project.  
@@ -306,10 +297,10 @@ az ad sp create-for-rbac --name "AzureResumeACG" --role contributor --scopes /su
 > If you want to overwrite the existing one, please add --overwrite in your command.
 > ```
 > *After revisiting the documentation, I added the ```--overwrite```flag in the workflow configuration. Once updated, the deployment worked successfully and the site began updating automatically on each push.*
+
 ### Implementing Unit Testing 
 
-While I had done some basic unit testing in my college courses, applying it to a live API was a completely different beast. This was easily the most challenging part of the entire project. The goal was to ensure that my Python logic—specifically the part that increments the visitor counter—worked perfectly before it ever touched my production database. To do this without actually writing "fake" data to Cosmos DB every time I ran a test, I had to learn the concept of Mocking. This allows the test to simulate a database response, ensuring the code logic is sound in a controlled environment.
-
+While I’d done basic unit testing in college, testing a live API was a whole different challenge. The goal was to ensure my Python logic for incrementing the visitor counter worked before touching the production database. To avoid writing “fake” data to Cosmos DB, I learned mocking—simulating database responses so tests could run safely and reliably.
 
 **Steps taken:**
 1. **Project Structure:** Created a `/tests` directory and added `__init__.py` to treat the folder as a package, along with `test_function.py` for the actual test cases.
@@ -324,9 +315,9 @@ python -m pytest tests
 
 >*Mocking was the "brick wall" of this challenge. Digging through the Azure Cosmos DB and Functions libraries was tough, and I eventually used AI to help me bridge the gap on the specific syntax needed to mock the database client. It was a huge "aha!" moment when the tests finally passed, and it taught me how crucial it is to have a testable architecture..*
 
-### Creating our frontend workflow
+### Creating our Backend workflow
 
-With the API working and the tests passing locally, the final step was to automate the backend deployment. I wanted a true CI/CD (Continuous Integration/Continuous Deployment) pipeline: whenever I push code, GitHub should automatically run my unit tests (CI) and, if they pass, deploy the updated function to Azure (CD). This ensures that I never accidentally "break" the live resume with a bad update.
+With the API working and tests passing locally, the final step was automating backend deployment. I set up a full CI/CD pipeline: GitHub automatically runs unit tests (CI) and, if they pass, deploys the updated function to Azure (CD). This ensures the live resume never breaks from a bad update.
 
 **Steps taken:**
 1. Workflow Configuration: Created .github/workflows/backend-main.yaml using a standard Microsoft Azure Functions template as the foundation.
@@ -357,7 +348,9 @@ With the API working and the tests passing locally, the final step was to automa
 6. Deployment: SSet up the final step to push the validated code to the Azure Function App only after tests passed.
 
 ## Next Steps
-- Add CI/CD pipeline  
-- Add analytics  
-- Improve accessibility  
 - Add resume download option  
+- Harden Azure permissions and roles (least privilege)  
+- Secure CI/CD pipeline: signed commits, dependency scanning, CodeQL, SBOM, Grype  
+- Add test/staging environments with PR deployments and smoke/end-to-end tests  
+- Implement monitoring and alerts with Application Insights, Azure Monitor, PagerDuty, and Slack  
+- Automate frontend and backend deployments using IaC, pipelines, and smoke tests
