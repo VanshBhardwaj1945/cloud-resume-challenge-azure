@@ -1,4 +1,11 @@
 # Cloud Resume Challenge Azure
+<figure>
+   <img src="docs/01-Project-Architecture.png
+" width="600">
+   <figcaption>
+     Preview of website
+   </figcaption>
+</figure>
 
 ## Table of Contents
 1. [Overview](#overview)
