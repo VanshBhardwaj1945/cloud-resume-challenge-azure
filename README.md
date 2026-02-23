@@ -1,11 +1,9 @@
 # Cloud Resume Challenge Azure
-<figure>
-   <img src="docs/01-Project-Architecture.png
-" width="600">
-   <figcaption>
-     Preview of website
-   </figcaption>
-</figure>
+
+<div style="display:flex; justify-content:center;">
+   <img src="docs/01-Project-Architecture.png" 
+        style="width:65%; max-width:800px; height:auto;">
+</div>
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -30,7 +28,6 @@
      - [Implementing Unit Testing](#creating-our-frontend-workflow)
      - [Creating out Backend workflow](#creating-our-backend-workflow)
 9. [Next Steps](#next-steps)
-
 
 ---
 
