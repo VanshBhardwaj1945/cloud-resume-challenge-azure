@@ -326,11 +326,11 @@ python -m pytest tests
 
 >*Mocking was the "brick wall" of this challenge. Digging through the Azure Cosmos DB and Functions libraries was tough, and I eventually used AI to help me bridge the gap on the specific syntax needed to mock the database client. It was a huge "aha!" moment when the tests finally passed, and it taught me how crucial it is to have a testable architecture..*
 
-**Full source:** [backend.main.yaml](.github/workflows/backend.main.yaml)
-
 ### Creating our Backend workflow
 
 With the API working and tests passing locally, the final step was automating backend deployment. I set up a full CI/CD pipeline: GitHub automatically runs unit tests (CI) and, if they pass, deploys the updated function to Azure (CD). This ensures the live resume never breaks from a bad update.
+
+**Full source:** [backend.main.yaml](.github/workflows/backend.main.yaml)
 
 **Steps taken:**
 1. Workflow Configuration: Created .github/workflows/backend-main.yaml using a standard Microsoft Azure Functions template as the foundation.
@@ -361,7 +361,7 @@ With the API working and tests passing locally, the final step was automating ba
 6. Deployment: Set up the final step to push the validated code to the Azure Function App only after tests passed.
 
 <figure>
-   <img src="docs/04-github-actions-deploy.png" width="600">
+   <img src="docs/04-github-actions-deploy.png" width="800">
    <figcaption>
      Successfull Workflows
    </figcaption>
