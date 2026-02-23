@@ -203,6 +203,8 @@ To do this, I created a Python-based Azure Function with an HTTP trigger..
 
 I created a new Azure Function project in: `resume-challenge/backend/api/` using the HTTP trigger template.
 
+**Full source:** [function_app.py](./backend/api/function_app.py)
+
 **Steps taken:**
 1. Created a new Azure Function project in `resume-challenge/backend/api/` using the HTTP trigger template.  
 2. Added the Cosmos DB connection string to `local.settings.json` for local testing.  
@@ -213,6 +215,7 @@ I created a new Azure Function project in: `resume-challenge/backend/api/` using
    - Update the item in the database  
    - Return the updated count as JSON  
 4. Verified that `.gitignore` excluded sensitive files like `local.settings.json` and the `.venv` folder.
+
 
 > *Although I have a strong background in Python, working with the ```python azure.functions ``` framework felt almost like learning Python in a new context. I had never used Azure Functions before, so understanding how decorators, triggers, and bindings worked within the Azure environment required a shift in mindset. I relied on Microsoft’s official documentation as a primary reference, along with additional research to better understand how everything fit together. Working with JSON was more familiar, but it still required careful thought to structure responses correctly and ensure the API returned clean, usable data to the frontend.*
 
@@ -246,6 +249,8 @@ After confirming the function worked locally, I deployed the Azure Function to t
 
 ### Connecting the Frontend
 With the Azure Function API deployed, I updated the frontend JavaScript to fetch the visitor count and display it on the website.
+
+**Full source:** [function_app.py](./frontend/script.js)
 
 **Steps taken:**
 1. Updated the HTML to include a counter element, e.g., `<span id="counter"></span>`.  
