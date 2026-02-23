@@ -147,7 +147,7 @@ Now, the project recommends using Azure to create a custom domain, but I chose t
 7. Configured DNSSEC
 
 <figure>
-   <img src="docs/03-cloudflare-dns.png.png" width="600">
+   <img src="docs/03-cloudflare-dns.png" width="600">
 </figure>
 
 > *Connecting Cloudflare’s domain to Azure Front Door had a few challenges. Initially, routing didn’t work because the proxy was enabled on the CNAME record, which prevented Azure Front Door from validating and routing the domain. After setting the CNAME to DNS-only, the routing worked as expected. I also learned that the TXT record for domain verification works independently of the proxy, which made that part straightforward.*
