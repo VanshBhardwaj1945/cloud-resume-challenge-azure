@@ -102,7 +102,7 @@ To start this project, I needed to create a simple webpage using HTML and CSS. I
 **Full source:** [style.css](./frontend/style.css)
 
 <figure>
-   <img src="docs/01-storage-static-website.png" width="600">
+   <img src="docs/02-storage-static-website.png" width="600">
    <figcaption>
      Preview of website
    </figcaption>
@@ -132,14 +132,6 @@ Originally, the challenge suggested using a CDN to improve performance, set up a
 
 > *Routing the static website through Front Door required some trial and error. I spent time understanding how endpoints, origin groups, and routing rules interacted, which was a bit confusing at first. After testing different configurations and fixing misconfigurations, I was able to get the routing working correctly. Traffic now flows smoothly through Front Door, with HTTPS enabled and all static content delivered reliably across regions.*
 
-**Screenshots**
-
-| Screenshot | Caption |
-|------------|---------|
-| `docs/02-frontdoor-origin-group.png` | Front Door origin configuration |
-| `docs/05-https-works.png` | HTTPS verification screenshot |
-
----
 
 ## Custom Domain HTTPS and Cloudflare DNS Setup
 
@@ -152,7 +144,11 @@ Now, the project recommends using Azure to create a custom domain, but I chose t
 4. Configured CNAME in Cloudflare  
 5. Verified domain ownership  
 6. Made sure HTTPS was enabled  
-7. Configured DNSSEC  
+7. Configured DNSSEC
+
+<figure>
+   <img src="docs/03-cloudflare-dns.png.png" width="600">
+</figure>
 
 > *Connecting Cloudflare’s domain to Azure Front Door had a few challenges. Initially, routing didn’t work because the proxy was enabled on the CNAME record, which prevented Azure Front Door from validating and routing the domain. After setting the CNAME to DNS-only, the routing worked as expected. I also learned that the TXT record for domain verification works independently of the proxy, which made that part straightforward.*
 
@@ -256,12 +252,18 @@ With the Azure Function API deployed, I updated the frontend JavaScript to fetch
 1. Updated the HTML to include a counter element, e.g., `<span id="counter"></span>`.  
 2. Added JavaScript in `script.js` to fetch the visitor count from the deployed Azure Function API:  
 ```javascript
-fetch('https://<your-function-app>.azurewebsites.net/api/getResumeCounter?code=<function-key>')
-  .then(response => response.json())
-  .then(data => {
-    document.getElementById('counter').innerText = data.count;
-  })
-  .catch(err => console.error(err));
+const counterEl = document.getElementById("counter");
+  try {
+    const res = await fetch(functionAPIURL);
+    if (!res.ok) throw new Error(`Function returned ${res.status}`);
+    const data = await res.json();
+
+    console.log("Website called function API.", data);
+
+    counterEl.innerText = data.count ?? "0";
+  } catch (err) {
+    console.error("getVisitCount error:", err);
+    counterEl.innerText = "—"; 
 ```
 3. Uploaded the updated HTML and JS files to the Azure Static Website storage.
 4. Verified that visiting the site through the custom domain correctly loads the API and displays the visitor count.
@@ -356,7 +358,14 @@ With the API working and tests passing locally, the final step was automating ba
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 ```
 
-6. Deployment: SSet up the final step to push the validated code to the Azure Function App only after tests passed.
+6. Deployment: Set up the final step to push the validated code to the Azure Function App only after tests passed.
+
+<figure>
+   <img src="docs/04-github-actions-deploy.png" width="600">
+   <figcaption>
+     Successfull Workflows
+   </figcaption>
+</figure>
 
 ## Next Steps
 - Add resume download option  
