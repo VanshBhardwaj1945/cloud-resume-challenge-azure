@@ -272,6 +272,8 @@ Up until this point, I had been uploading and updating everything manually. For 
 
 ### Creating our frontend workflow
 
+**Full source:** [frontend.main.yaml](.github/workflows/frontend.main.yaml)
+
 TThis section automates frontend deployment using GitHub Actions:
 
 - **Version Control** – Code tracked in GitHub with structured commits.
@@ -307,6 +309,8 @@ az ad sp create-for-rbac --name "AzureResumeACG" --role contributor --scopes /su
 
 While I’d done basic unit testing in college, testing a live API was a whole different challenge. The goal was to ensure my Python logic for incrementing the visitor counter worked before touching the production database. To avoid writing “fake” data to Cosmos DB, I learned mocking—simulating database responses so tests could run safely and reliably.
 
+**Full source:** [test_function_app.py](backend/tests/test_function_app.py)
+
 **Steps taken:**
 1. **Project Structure:** Created a `/tests` directory and added `__init__.py` to treat the folder as a package, along with `test_function.py` for the actual test cases.
 2. **Environment Setup:** Configured a Python virtual environment `.venv` within the `/api` folder to keep dependencies isolated and manageable.
@@ -319,6 +323,8 @@ python -m pytest tests
 ```
 
 >*Mocking was the "brick wall" of this challenge. Digging through the Azure Cosmos DB and Functions libraries was tough, and I eventually used AI to help me bridge the gap on the specific syntax needed to mock the database client. It was a huge "aha!" moment when the tests finally passed, and it taught me how crucial it is to have a testable architecture..*
+
+**Full source:** [backend.main.yaml](.github/workflows/backend.main.yaml)
 
 ### Creating our Backend workflow
 
