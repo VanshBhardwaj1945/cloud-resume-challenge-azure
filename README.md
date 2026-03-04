@@ -1,380 +1,462 @@
-# Cloud Resume Challenge Azure
+# Cloud Resume Challenge — Azure
 
 <div style="display:flex; justify-content:center;">
-   <img src="docs/01-Project-Architecture.png" 
-        style="width:65%; max-width:800px; height:auto;">
+  <img src="docs/01-Project-Architecture.png" style="width:65%; max-width:800px; height:auto;">
 </div>
 
 ## Table of Contents
+
 1. [Overview](#overview)
-2. [What-is-the-cloud-resume-challenge?](#what-is-the-cloud-resume-challenge)
+2. [What is the Cloud Resume Challenge?](#what-is-the-cloud-resume-challenge)
 3. [Tech Stack and Tools](#tech-stack-and-tools)
 4. [Frontend](#frontend)
    - [HTML](#html)
    - [CSS](#css)
 5. [Static Website and Front Door CDN Setup](#static-website-and-front-door-cdn-setup)
-   - [Deploying Static Website](#deploying-static-website)
+   - [Deploying the Static Website](#deploying-the-static-website)
    - [Configuring Azure Front Door](#configuring-azure-front-door)
-6. [Custom Domain HTTPS and Cloudflare DNS Setup](#custom-domain-https-and-cloudflare-dns-setup)
-7. [Setting up Visitor Count via API and Database](#setting-up-visitor-count-via-api-and-database)
-   - [Creating the Database (Cosmos DB)](#71-creating-the-database-cosmos-db)
-   - [Creating and Deploying the API with Azure Functions](#72-creating-and-deploying-the-api-with-azure-functions)
-     - [Creating the Azure Function Project](#creating-the-azure-function-project)
-     - [Testing the Function Locally](#testing-the-function-locally)
-     - [Deploying to Azure Function apps](#deploying-to-azure-function-apps)
+6. [Custom Domain, HTTPS, and Cloudflare DNS Setup](#custom-domain-https-and-cloudflare-dns-setup)
+7. [Visitor Counter — API and Database](#visitor-counter--api-and-database)
+   - [Creating the Database (Cosmos DB)](#creating-the-database-cosmos-db)
+   - [Creating and Deploying the Azure Function API](#creating-and-deploying-the-azure-function-api)
+     - [Creating the Function Project](#creating-the-function-project)
+     - [Testing Locally](#testing-locally)
+     - [Deploying to Azure](#deploying-to-azure)
    - [Connecting the Frontend](#connecting-the-frontend)
-8. [Creating our CI/CD Workflow](#creating-our-CI/CD-workflow)
-     - [Creating out Frontend workflow](#creating-our-frontend-workflow)
-     - [Implementing Unit Testing](#creating-our-frontend-workflow)
-     - [Creating out Backend workflow](#creating-our-backend-workflow)
-9. [Next Steps](#next-steps)
+8. [CI/CD Workflow](#cicd-workflow)
+   - [Frontend Workflow](#frontend-workflow)
+   - [Unit Testing](#unit-testing)
+   - [Backend Workflow](#backend-workflow)
+9. [Infrastructure as Code with Terraform](#infrastructure-as-code-with-terraform)
+   - [Why Terraform](#why-terraform)
+   - [Project Structure](#project-structure)
+   - [Resources Managed](#resources-managed)
+   - [Importing Existing Infrastructure](#importing-existing-infrastructure)
+   - [Secrets and Variable Management](#secrets-and-variable-management)
+10. [Next Steps](#next-steps)
 
 ---
 
 ## Overview
 
-This project is my personal cloud-hosted resume. It’s a simple static website served globally via Azure Front Door, with a small serverless API that keeps track of visitor counts. The goal was to learn real-world cloud deployment while keeping everything automated and secure.
+This project is my personal cloud-hosted resume — a static website served globally via Azure Front Door, backed by a small serverless API that tracks visitor counts. The goal was to learn real-world cloud deployment while keeping everything automated, version-controlled, and secure.
 
+**Live site:** [https://resume.vanshbhardwaj.com](https://resume.vanshbhardwaj.com)
 
-**Live Website:**   [https://resume.vanshbhardwaj.com](https://resume.vanshbhardwaj.com)
+**Skills demonstrated:**
 
-Skills demonstrated in this project:
-
-- Frontend development with HTML, CSS, and a bit of JavaScript
-- Hosting a static site in the cloud with Azure Storage
+- Frontend development with HTML, CSS, and JavaScript
+- Static site hosting on Azure Storage
 - Global content delivery via Azure Front Door
-- Custom domain setup with HTTPS and Cloudflare DNS management
-- Serverless API with Azure Functions to safely handle backend data
+- Custom domain setup with HTTPS and Cloudflare DNS
+- Serverless API with Azure Functions
+- NoSQL database with Azure Cosmos DB
 - CI/CD automation with GitHub Actions
-- Demonstrating infrastructure understanding
+- Infrastructure as Code with Terraform
 
 ---
 
 ## What is the Cloud Resume Challenge?
 
-The Cloud Resume Challenge is a small, practical project designed to teach the basics of deploying a real cloud application: a static resume site served from the edge plus a tiny backend for a visitor counter. It’s a great checklist to force you to think about hosting, DNS, HTTPS, a serverless API, and automated deploys — all the parts that matter in real-world cloud work.
+The Cloud Resume Challenge is a hands-on project that teaches the fundamentals of deploying a real cloud application — a static resume site served from the edge, plus a small backend for a visitor counter. It covers hosting, DNS, HTTPS, serverless APIs, and automated deployments; all the parts that matter in real-world cloud work.
 
-**Official challenge instructions:** [https://cloudresumechallenge.dev/docs/the-challenge/azure/](https://cloudresumechallenge.dev)
+**Official challenge:** [cloudresumechallenge.dev](https://cloudresumechallenge.dev/docs/the-challenge/azure/)
 
-A few quick notes about how I used the challenge here:
-
-- I followed the Azure variant of the guide and then extended it — adding Front Door, Cloudflare DNS, a Python Azure Function, and GitHub Actions for CI/CD.
-- The goal wasn’t just to complete the checklist. It was to make a small, realistic deployment you can iterate on and show to employers.
+I followed the Azure variant and extended it beyond the base requirements — adding Azure Front Door, Cloudflare DNS with DNSSEC, a Python Azure Function, GitHub Actions CI/CD, and full Terraform IaC. The goal wasn't just to complete the checklist, but to build something small and realistic that I could iterate on and show to employers.
 
 ---
 
 ## Tech Stack and Tools
 
-| Tool or Technology | Purpose |
-|--------------------|---------|
-| HTML | Structure static resume content |
-| CSS | Styling and layout |
+| Tool / Technology | Purpose |
+|---|---|
+| HTML | Resume structure and content |
+| CSS | Styling and responsive layout |
 | JavaScript | Frontend logic and API calls |
-| Python | Language for backend API |
-| pytest | Run unit tests locally |
-| Azure Portal | Configure and manage Azure resources |
-| Azure Storage Static Website | Host static frontend files |
+| Python 3.11 | Backend API language |
+| pytest | Unit testing for the Azure Function |
+| Azure Storage (Static Website) | Frontend file hosting |
 | Azure Front Door | Global routing, CDN, and HTTPS termination |
+| Azure Cosmos DB | Persistent visitor count storage |
+| Azure Functions (Flex Consumption) | Serverless HTTP API |
+| Azure Functions Core Tools | Local development and testing |
+| AFD Managed SSL Certificate | HTTPS for the custom domain |
 | Cloudflare | DNS management and DNSSEC |
-| AFD Managed SSL Certificate | Enable secure HTTPS traffic |
-| Azure Cosmos DB | Store and persist visitor count data |
-| Azure Functions (Python) | Serverless API to read and update the database |
-| Azure Functions Core Tools | Local development and testing of functions |
-| Git and GitHub | Version control and source code management |
-| curl | Test API endpoints and site availability |
-| Web browser | Manual testing and HTTPS verification |
+| Terraform | Infrastructure as Code |
+| GitHub Actions | CI/CD automation |
+| Git / GitHub | Version control |
+| Azure CLI | Resource management and deployment scripting |
+| curl | API endpoint testing |
 
 ---
 
 ## Frontend
 
-To start this project, I needed to create a simple webpage using HTML and CSS. I’ve been playing around with this since I was a kid, so I was able to put one together quickly. It might not be the prettiest yet, but my main focus was learning how to deploy it through Azure. I hope to improve the design later, but for now, getting it up and running was the goal. I also decided to add JavaScript later in the project, since it’s primarily needed when connecting the frontend to my Azure Function API.
+The frontend is a simple static resume built with HTML and CSS. It was the starting point of the project — the focus at this stage was getting something deployed to Azure rather than building a polished UI. JavaScript was added later when connecting to the Azure Function API.
 
 ### HTML
 
-**Steps taken:**
-- Created `index.html` with sections for work experience, education, and skills  
+- Created `index.html` with sections for experience, education, and skills
 
-**Full source:** [index.html](./frontend/index.html)
+**Source:** [`frontend/index.html`](./frontend/index.html)
 
 ### CSS
 
-**Steps taken:**
-- Created `style.css` for layout, fonts, and responsive design  
-- Linked CSS file to HTML  
+- Created `style.css` for layout, typography, and responsive design
+- Linked stylesheet to `index.html`
 
-**Full source:** [style.css](./frontend/style.css)
+**Source:** [`frontend/style.css`](./frontend/style.css)
 
 <figure>
-   <img src="docs/02-storage-static-website.png" width="600">
-   <figcaption>
-     Preview of website
-   </figcaption>
+  <img src="docs/02-storage-static-website.png" width="600">
+  <figcaption>Preview of the static website</figcaption>
 </figure>
 
 ---
 
 ## Static Website and Front Door CDN Setup
 
-### Deploying Static Website
+### Deploying the Static Website
 
 **Steps taken:**
-1. Created Azure Storage account  
-2. Enabled static website hosting  
-3. Uploaded HTML and CSS files  
-4. Verified the static endpoint  
+1. Created an Azure Storage account
+2. Enabled static website hosting
+3. Uploaded `index.html` and `style.css`
+4. Verified the storage static endpoint was accessible
 
 ### Configuring Azure Front Door
 
-Originally, the challenge suggested using a CDN to improve performance, set up a custom domain, and ensure the site only used HTTPS. As of late 2025, that option was replaced with Azure Front Door, which provides a smarter, global way to route traffic. Front Door not only speeds up content delivery like a CDN but also adds advanced routing, security, and high availability across regions, making your site more reliable. I first started by configuring Front Door and turning on HTTPS for secure connections.
+The challenge originally suggested using Azure CDN, but as of late 2025 that has been superseded by Azure Front Door. Front Door provides everything a CDN offers — edge caching, global routing, HTTPS — plus advanced routing rules, health probes, and higher availability across regions.
 
 **Steps taken:**
-1. Created an Azure Front Door profile  
-2. Added my Azure Storage static website endpoint as an origin.
-3. Created an origin group and routing rules to send traffic for the site hostname to that origin group. 
-4. Enabled HTTPS for secure connections  
+1. Created an Azure Front Door profile (Standard tier)
+2. Added the Azure Storage static website as an origin
+3. Created an origin group with a health probe
+4. Configured a routing rule to forward traffic to the origin group
+5. Enabled HTTPS-only traffic
 
-> *Routing the static website through Front Door required some trial and error. I spent time understanding how endpoints, origin groups, and routing rules interacted, which was a bit confusing at first. After testing different configurations and fixing misconfigurations, I was able to get the routing working correctly. Traffic now flows smoothly through Front Door, with HTTPS enabled and all static content delivered reliably across regions.*
+> *Getting Front Door routing working correctly took trial and error. Understanding how endpoints, origin groups, and routing rules interact wasn't obvious at first. After testing different configurations and reviewing the documentation, traffic was routing correctly with HTTPS enforced end-to-end.*
 
+---
 
-## Custom Domain HTTPS and Cloudflare DNS Setup
+## Custom Domain, HTTPS, and Cloudflare DNS Setup
 
-Now, the project recommends using Azure to create a custom domain, but I chose to use Cloudflare instead. This allowed me to protect my DNS setup from potential spoofing or “man-in-the-middle” attacks by enabling DNSSEC, adding an extra layer of security for my domain.
+The challenge recommends using Azure's built-in domain management, but I chose Cloudflare for DNS. This allowed me to enable DNSSEC — which protects against DNS spoofing and man-in-the-middle attacks — something that isn't straightforward with Azure DNS alone.
 
 **Steps taken:**
-1. Bought a custom domain through Cloudflare  
-2. Added the custom domain in Azure Front Door  
-3. Added the TXT record in Cloudflare to verify domain ownership  
-4. Configured CNAME in Cloudflare  
-5. Verified domain ownership  
-6. Made sure HTTPS was enabled  
-7. Configured DNSSEC
+1. Purchased a custom domain through Cloudflare
+2. Added the custom domain in Azure Front Door
+3. Added the TXT record in Cloudflare for AFD domain ownership verification
+4. Configured a CNAME record pointing `resume.vanshbhardwaj.com` to the Front Door endpoint
+5. Verified domain ownership in the Azure portal
+6. Confirmed HTTPS was active via the AFD-managed SSL certificate
+7. Enabled DNSSEC on the Cloudflare zone
 
 <figure>
-   <img src="docs/03-cloudflare-dns.png" width="600">
+  <img src="docs/03-cloudflare-dns.png" width="600">
 </figure>
 
-> *Connecting Cloudflare’s domain to Azure Front Door had a few challenges. Initially, routing didn’t work because the proxy was enabled on the CNAME record, which prevented Azure Front Door from validating and routing the domain. After setting the CNAME to DNS-only, the routing worked as expected. I also learned that the TXT record for domain verification works independently of the proxy, which made that part straightforward.*
+> *The CNAME record initially had Cloudflare's proxy enabled, which blocked Azure Front Door from validating the domain. Setting it to DNS-only mode resolved the issue. The TXT verification record is unaffected by the proxy setting, so that part was straightforward.*
 
 ---
 
-## Setting up Visitor Count via API and Database
+## Visitor Counter — API and Database
 
-This project introduces backend integration by requiring the website to retrieve and update a visitor count using a database. While I have worked with APIs before, I had never actually designed and built my own backend architecture from scratch. Figuring out how the frontend, API, and database should securely communicate with each other was easily one of the most challenging parts of the project, but it was also one of the most rewarding because it made everything finally click.
+This section introduces backend integration: the site fetches and displays a visitor count stored in a database. The architecture deliberately keeps the database behind an API layer — the frontend never communicates with Cosmos DB directly.
 
-The project specifically requires:
-- A database to store the visitor count
-- An API to handle read and update operations
-- Secure separation between frontend and database
-- Deployment of the API to Azure
-- Integration with the static website
-- To meet these requirements, I implemented the following architecture:
-- Frontend (JavaScript) → Azure Function API → Cosmos DB
+**Architecture:**
+```
+Frontend (JavaScript) → Azure Function API → Cosmos DB
+```
 
-This design keeps database credentials secure, enforces controlled access to data, and reflects how real-world cloud applications are structured.
-
----
+This keeps credentials secure, enforces controlled access to data, and mirrors how real-world cloud applications are structured.
 
 ### Creating the Database (Cosmos DB)
 
-I used serverless Cosmos DB to create the database for storing visitor counts.
-Using Cosmos DB allows for globally scalable, low-latency storage while maintaining a simple document structure.
+A serverless Cosmos DB account was used to store the visitor count as a single document. Serverless billing means no minimum cost — the database only charges per request, which is appropriate for low-traffic use.
 
-**Database name:** `counter`  
-**Container name:** `visitorcount`  
-**Item:** `counter`  
+| Setting | Value |
+|---|---|
+| Database | `counter` |
+| Container | `visitorcount` |
+| Partition key | `/id` |
 
-**Example document stored in the container:**
+**Document structure:**
 ```json
-{ 
-   "id": "counter",
-   "count": 36
+{
+  "id": "counter",
+  "count": 36
 }
 ```
 
-This document represents the current visitor count. Each time the API is called, the count value is incremented and updated.
+Each API call reads this document, increments `count` by 1, writes it back, and returns the updated value.
 
-### Creating and Deploying the API with Azure Functions
+### Creating and Deploying the Azure Function API
 
-Instead of letting the frontend talk directly to Cosmos DB, I wanted to make the setup more secure and realistic, so I built an API layer to handle all database operations. 
-To do this, I created a Python-based Azure Function with an HTTP trigger..
+A Python Azure Function with an HTTP trigger handles all database operations. This keeps the Cosmos DB connection string server-side and out of the browser.
 
-### Creating the Azure Function Project
+### Creating the Function Project
 
-I created a new Azure Function project in: `resume-challenge/backend/api/` using the HTTP trigger template.
-
-**Full source:** [function_app.py](./backend/api/function_app.py)
+**Source:** [`backend/api/function_app.py`](./backend/api/function_app.py)
 
 **Steps taken:**
-1. Created a new Azure Function project in `resume-challenge/backend/api/` using the HTTP trigger template.  
-2. Added the Cosmos DB connection string to `local.settings.json` for local testing.  
-3. Implemented the main function in `function_app.py` to:  
-   - Connect to Cosmos DB  
-   - Read the current visitor count  
-   - Increment the count by 1  
-   - Update the item in the database  
-   - Return the updated count as JSON  
-4. Verified that `.gitignore` excluded sensitive files like `local.settings.json` and the `.venv` folder.
+1. Initialised a new Azure Function project in `backend/api/` using the HTTP trigger template
+2. Added the Cosmos DB connection string to `local.settings.json` for local development
+3. Implemented `function_app.py` to:
+   - Connect to Cosmos DB using the connection string from application settings
+   - Read the current visitor count document
+   - Increment the count by 1
+   - Write the updated document back to the database
+   - Return the new count as JSON
+4. Confirmed `local.settings.json` and `.venv/` were excluded via `.gitignore`
 
+> *The `azure.functions` decorator pattern was new to me — I had used Python extensively before but never in an Azure Functions context. Understanding how HTTP triggers, bindings, and the function runtime fit together required a shift in thinking. Microsoft's official documentation was the primary reference, supplemented by additional research to understand the request and response object structures.*
 
-> *Although I have a strong background in Python, working with the ```python azure.functions ``` framework felt almost like learning Python in a new context. I had never used Azure Functions before, so understanding how decorators, triggers, and bindings worked within the Azure environment required a shift in mindset. I relied on Microsoft’s official documentation as a primary reference, along with additional research to better understand how everything fit together. Working with JSON was more familiar, but it still required careful thought to structure responses correctly and ensure the API returned clean, usable data to the frontend.*
-
-###  Testing the Function Locally
-
-Before connecting the frontend, I tested the Azure Function locally to make sure it correctly incremented and returned the visitor count from Cosmos DB.
+### Testing Locally
 
 **Steps taken:**
-1. Ran the Azure Function project locally using:  
+1. Started the function locally:
 ```bash
 func host start
 ```
-2. Verified that the function:
+2. Verified the function:
    - Incremented the visitor count in Cosmos DB
-   - Returned JSON like ```json { "count": 37 } ```
-   - Worked without errors or exceptions
-3. Confirmed that the function logic was correct and ready to be deployed to Azure.
+   - Returned a valid JSON response: `{ "count": 37 }`
+   - Ran without exceptions
 
-### Deploying to Azure Function apps
-
-After confirming the function worked locally, I deployed the Azure Function to the cloud and configured it to work securely with the frontend and Cosmos DB.
+### Deploying to Azure
 
 **Steps taken:**
-1. Created a new Azure Function App in the Azure portal.  
-2. Configured **Application Settings**, including the Cosmos DB connection string and any necessary environment variables.  
-3. Deployed the local Azure Function project to the Azure Function App.  
-4. Configured **CORS** settings to allow requests from the frontend:  
-   - Enabled `Access-Control-Allow-Credentials`  
-   - Added the custom domain `resume.vanshbhardwaj.com` as an allowed origin  
-5. Verified that the deployed function could access Cosmos DB and respond to HTTP requests correctly.
+1. Created an Azure Function App (Flex Consumption plan, Python 3.11, Linux)
+2. Added the Cosmos DB connection string as an Application Setting
+3. Deployed the function to the Function App
+4. Configured CORS to allow requests from the frontend:
+   - Allowed origins: `https://resume.vanshbhardwaj.com` and `https://crcfrontendra.z19.web.core.windows.net`
+   - Enabled `Access-Control-Allow-Credentials`
+5. Verified the deployed function responded correctly to HTTP requests
 
 ### Connecting the Frontend
-With the Azure Function API deployed, I updated the frontend JavaScript to fetch the visitor count and display it on the website.
 
-**Full source:** [function_app.py](./frontend/script.js)
+**Source:** [`frontend/script.js`](./frontend/script.js)
 
 **Steps taken:**
-1. Updated the HTML to include a counter element, e.g., `<span id="counter"></span>`.  
-2. Added JavaScript in `script.js` to fetch the visitor count from the deployed Azure Function API:  
+1. Added a `<span id="counter"></span>` element to `index.html`
+2. Added JavaScript in `script.js` to call the API on page load:
 ```javascript
 const counterEl = document.getElementById("counter");
-  try {
-    const res = await fetch(functionAPIURL);
-    if (!res.ok) throw new Error(`Function returned ${res.status}`);
-    const data = await res.json();
-
-    console.log("Website called function API.", data);
-
-    counterEl.innerText = data.count ?? "0";
-  } catch (err) {
-    console.error("getVisitCount error:", err);
-    counterEl.innerText = "—"; 
+try {
+  const res = await fetch(functionAPIURL);
+  if (!res.ok) throw new Error(`Function returned ${res.status}`);
+  const data = await res.json();
+  counterEl.innerText = data.count ?? "0";
+} catch (err) {
+  console.error("getVisitCount error:", err);
+  counterEl.innerText = "—";
+}
 ```
-3. Uploaded the updated HTML and JS files to the Azure Static Website storage.
-4. Verified that visiting the site through the custom domain correctly loads the API and displays the visitor count.
+3. Uploaded the updated files to Azure Storage
+4. Verified the visitor count loaded correctly on the live site
 
-## Creating our CI/CD Workflow
+---
 
-Up until this point, I had been uploading and updating everything manually. For this step, I created a GitHub Actions workflow and configured a Service Principal so GitHub could securely authenticate with Azure and deploy the site automatically. Instead of hardcoding credentials, I stored them as encrypted GitHub secrets and used them in the workflow file. Now, whenever I push changes to the repository, the website updates on its own — which felt like a big shift from manual uploads to a more real-world, automated deployment process.
+## CI/CD Workflow
 
-### Creating our frontend workflow
+Up to this point all deployments were manual. This section introduces GitHub Actions workflows to automate both frontend and backend deployments. A Service Principal was created and its credentials stored as encrypted GitHub Secrets, so the workflows can authenticate with Azure without any hardcoded credentials.
 
-**Full source:** [frontend.main.yaml](.github/workflows/frontend.main.yaml)
+### Frontend Workflow
 
-TThis section automates frontend deployment using GitHub Actions:
+**Source:** [`.github/workflows/frontend.main.yaml`](.github/workflows/frontend.main.yaml)
 
-- **Version Control** – Code tracked in GitHub with structured commits.
-- **CI (Continuous Integration)** – Each push triggers the workflow automatically.
-- **CD (Continuous Deployment)** – Updates deploy to Azure Storage without manual steps.
+On every push to `main` that touches the `frontend/` directory, the workflow uploads the updated static files to Azure Storage automatically.
 
-While I had experience being part of a CI/CD workflow, actually creating one from scratch was a different story. This replaced manual uploads with a reliable, repeatable, automated process.
-
-**Steps taken**
-1. Created a new GitHub repository for the project.  
-2. Reviewed all `.gitignore` files and added a root-level `.gitignore` to ensure no sensitive or unnecessary files were committed.  
-3. Created a workflow file at `.github/workflows/frontend-main.yaml`.  
-4. Created a Service Principal and assigned it the **Contributor** role using RBAC:
+**Steps taken:**
+1. Created a Service Principal with the Contributor role:
 ```bash
-az ad sp create-for-rbac --name "AzureResumeACG" --role contributor --scopes /subscriptions/****-****-****-**** --sdk-auth
+az ad sp create-for-rbac \
+  --name "AzureResumeACG" \
+  --role contributor \
+  --scopes /subscriptions/YOUR_SUBSCRIPTION_ID \
+  --sdk-auth
 ```
-5. Stored the generated credentials as encrypted GitHub Secrets.
-6. Used the Microsoft GitHub Actions template as a base and modified the YAML file to match my architecture and storage setup.
-7. Pushed the code to the repository to trigger the workflow.
+2. Stored the credentials as an encrypted GitHub Secret (`AZURE_CREDENTIALS`)
+3. Created `.github/workflows/frontend.main.yaml` based on the Microsoft GitHub Actions template
+4. Pushed to `main` to trigger the workflow
 
-> *While doing this I had problems with the template woflow code given by microsoft here:
-> https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-static-site-github-actions?tabs=userlevel
-> Although the workflow was triggering correctly, the deployment to Azure Static Website storage was failing. After troubleshooting and reviewing the GitHub Actions logs, I found the following error:*
-> ```git
-> ERROR: The specified blob already exists.
-> RequestId:ad9764e0-501e-0051-15d3-9f4098000000
-> ErrorCode:BlobAlreadyExists
-> If you want to overwrite the existing one, please add --overwrite in your command.
-> ```
-> *After revisiting the documentation, I added the ```--overwrite```flag in the workflow configuration. Once updated, the deployment worked successfully and the site began updating automatically on each push.*
+> *The Microsoft template failed on first run with a `BlobAlreadyExists` error — the `az storage blob upload-batch` command needed the `--overwrite` flag. After that fix, deployments ran cleanly on every push.*
 
-### Implementing Unit Testing 
+### Unit Testing
 
-While I’d done basic unit testing in college, testing a live API was a whole different challenge. The goal was to ensure my Python logic for incrementing the visitor counter worked before touching the production database. To avoid writing “fake” data to Cosmos DB, I learned mocking—simulating database responses so tests could run safely and reliably.
+Before automating deployment, the Azure Function's core logic needed to be testable without touching the production database. This required mocking — simulating Cosmos DB responses so tests could run safely in any environment.
 
-**Full source:** [test_function_app.py](backend/tests/test_function_app.py)
+**Source:** [`backend/tests/test_function_app.py`](backend/tests/test_function_app.py)
 
 **Steps taken:**
-1. **Project Structure:** Created a `/tests` directory and added `__init__.py` to treat the folder as a package, along with `test_function.py` for the actual test cases.
-2. **Environment Setup:** Configured a Python virtual environment `.venv` within the `/api` folder to keep dependencies isolated and manageable.
-3. **Dependency Management:** Installed pytest and added it to the requirements.txt file to ensure the testing framework was available both locally and in the GitHub Actions runner.
-4. **Writing the Tests:** Developed test cases that "mocked" the Azure Cosmos DB and Azure Functions libraries. Since the official documentation was a bit dense, I used AI to help me identify the specific objects within the Azure SDK that needed to be mocked.
-6. **Manual Verification:** Ran the suite locally to ensure a 100% pass rate before attempting to automate the process.
-```bash 
-source api/.venv/bin/activate
-python -m pytest tests
+1. Created `backend/tests/` with `__init__.py` to make it a Python package
+2. Configured a `.venv` virtual environment inside `backend/api/` to isolate dependencies
+3. Added `pytest` to `requirements.txt`
+4. Wrote test cases that mock the Azure Cosmos DB client and the Azure Functions HTTP request/response objects
+5. Verified all tests passed locally:
+```bash
+source backend/api/.venv/bin/activate
+python -m pytest backend/tests -v
 ```
 
->*Mocking was the "brick wall" of this challenge. Digging through the Azure Cosmos DB and Functions libraries was tough, and I eventually used AI to help me bridge the gap on the specific syntax needed to mock the database client. It was a huge "aha!" moment when the tests finally passed, and it taught me how crucial it is to have a testable architecture..*
+> *Mocking was the hardest part of the entire project. The Azure SDK has many internal objects that need to be mocked at the right level, and the documentation doesn't make this obvious. After working through it — with some AI assistance to identify the correct mock targets — tests passed cleanly. It was a significant moment that underlined why testable architecture matters.*
 
-### Creating our Backend workflow
+### Backend Workflow
 
-With the API working and tests passing locally, the final step was automating backend deployment. I set up a full CI/CD pipeline: GitHub automatically runs unit tests (CI) and, if they pass, deploys the updated function to Azure (CD). This ensures the live resume never breaks from a bad update.
+**Source:** [`.github/workflows/backend.main.yaml`](.github/workflows/backend.main.yaml)
 
-**Full source:** [backend.main.yaml](.github/workflows/backend.main.yaml)
+On every push to `main` that touches the `backend/` directory, the workflow runs unit tests first and only deploys if they pass.
 
 **Steps taken:**
-1. Workflow Configuration: Created .github/workflows/backend-main.yaml using a standard Microsoft Azure Functions template as the foundation.
-2. Integrating CI (Testing): Added a specific step in the `YAML` file to set up the Python environment, install requirements, and run pytest before any deployment happens.
-
+1. Created `.github/workflows/backend.main.yaml`
+2. Added a test step to run before any deployment:
 ```yaml
-    - name: Run Unit Tests
-      shell: bash
-      run: |
-        cd backend/api
-        python -m venv .venv
-        source .venv/bin/activate
-        pip install --upgrade pip
-        pip install -r requirements.txt
-        cd ..
-        python -m pytest tests -v
+- name: Run Unit Tests
+  shell: bash
+  run: |
+    cd backend/api
+    python -m venv .venv
+    source .venv/bin/activate
+    pip install --upgrade pip
+    pip install -r requirements.txt
+    cd ..
+    python -m pytest tests -v
+```
+3. Added Azure login using the Service Principal secret:
+```yaml
+- name: Login via Azure CLI
+  uses: azure/login@v2
+  with:
+    creds: ${{ secrets.AZURE_CREDENTIALS }}
+```
+4. Added a deployment step using the Azure CLI:
+```yaml
+- name: Deploy to Azure Functions
+  shell: bash
+  run: |
+    cd ./backend/api
+    zip -r /tmp/function.zip . \
+      --exclude ".venv/*" \
+      --exclude "__pycache__/*" \
+      --exclude "*.pyc"
+    az functionapp deployment source config-zip \
+      --name page-counter \
+      --resource-group crc-backend-rg \
+      --src /tmp/function.zip
 ```
 
-4. Security & Authentication: Configured an Azure Login action using a Service Principal and GitHub Secrets to allow GitHub to securely talk to my Azure subscription.
-
-```yaml
-    - name: 'Login via AzureCLI'
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-```
-
-6. Deployment: Set up the final step to push the validated code to the Azure Function App only after tests passed.
+> *The original workflow used `Azure/functions-action@v1`, which does not correctly detect the Python runtime on a Flex Consumption plan — it treated the app as a V1 function and overwrote the runtime configuration on every deploy. Switching to `az functionapp deployment source config-zip` — the correct deployment method for Flex Consumption — resolved the issue permanently.*
 
 <figure>
-   <img src="docs/04-github-actions-deploy.png" width="800">
-   <figcaption>
-     Successfull Workflows
-   </figcaption>
+  <img src="docs/04-github-actions-deploy.png" width="800">
+  <figcaption>Successful workflow runs in GitHub Actions</figcaption>
 </figure>
 
+---
+
+## Infrastructure as Code with Terraform
+
+After building the project manually through the Azure Portal, all infrastructure was codified using Terraform. Every resource — Azure and Cloudflare — is now declared in version-controlled `.tf` files, giving a complete, auditable, and reproducible picture of the environment.
+
+**Source:** [`infra/terraform/`](./infra/terraform/)
+
+### Why Terraform
+
+Clicking through the portal is fine for learning, but it leaves no record of how things were configured and makes it difficult to reproduce or audit the setup. Terraform solves this by declaring infrastructure in code that can be committed to Git, reviewed like any other change, and applied consistently. It also forces a deeper understanding of each resource — you have to know what every argument does rather than accepting portal defaults.
+
+### Project Structure
+
+The configuration is split into logical files rather than one large `main.tf`:
+
+```
+infra/terraform/
+├── main.tf              # Provider configuration
+├── resource_groups.tf   # Frontend and backend resource groups
+├── frontend.tf          # Storage account, Front Door, origin, route, custom domain
+├── backend.tf           # Cosmos DB, Function App, App Service Plan, storage
+├── dns.tf               # Cloudflare DNS records and DNSSEC
+├── variables.tf         # Input variable declarations
+└── terraform.tfvars     # Secret values — gitignored, never committed
+```
+
+### Resources Managed
+
+All infrastructure is managed across two Terraform providers:
+
+**Azure (`hashicorp/azurerm` ~> 4.21):**
+
+| Resource Type | Name |
+|---|---|
+| Resource Groups | `crc-frontend-rg`, `crc-backend-rg` |
+| Storage Account (frontend) | `crcfrontendra` |
+| Front Door Profile | `crc-resume-fd` |
+| Front Door Origin Group | `resume-origin-group` |
+| Front Door Origin | `crcfrontendra-staticwebsite` |
+| Front Door Endpoint | `crc-vansh-resume` |
+| Front Door Route | `frontendra-fd-route` |
+| Front Door Custom Domain | `resume-vanshbhardwaj-com-4f0a` |
+| Cosmos DB Account | `crc-visitor-counter` |
+| Cosmos DB Database | `counter` |
+| Cosmos DB Container | `visitorcount` |
+| Storage Account (backend) | `crcbackendrg9af7` |
+| Storage Container (deployments) | `app-package-page-counter-52f547a` |
+| App Service Plan | `ASP-crcbackendrg-9747` (Flex Consumption) |
+| Function App | `page-counter` (Python 3.11) |
+
+**Cloudflare (`cloudflare/cloudflare` ~> 5):**
+
+| Resource Type | Purpose |
+|---|---|
+| TXT record (`_dnsauth.resume`) | Azure Front Door domain ownership verification |
+| CNAME record (`resume`) | Points `resume.vanshbhardwaj.com` to the Front Door endpoint |
+| Zone DNSSEC | Cryptographic protection for the `vanshbhardwaj.com` zone |
+
+### Importing Existing Infrastructure
+
+Since all resources were originally created through the portal, `terraform import` was used to bring each one into state without recreating anything. This was the most involved part of the process — the Azure provider is strict about resource ID casing, portal defaults often differ from Terraform defaults, and some resources had provider-level bugs that required workarounds.
+
+**Key issues resolved:**
+
+| Issue | Resolution |
+|---|---|
+| Front Door route name mismatch | Actual name (`frontendra-fd-route`) differed from what the portal showed — discovered by exporting the ARM template |
+| `azurerm_cdn_frontdoor_custom_domain_association` import bug | Known provider bug with no fix; worked around by linking the custom domain directly on the route via `cdn_frontdoor_custom_domain_ids` |
+| Cosmos DB partition key version | Terraform defaults to version 1; the portal creates version 2 — required explicitly setting `partition_key_version = 2` to avoid a forced destroy and recreate |
+| Flex Consumption Function App | Required upgrading the provider from `~> 4.1` to `~> 4.21` to access `azurerm_function_app_flex_consumption` |
+| Cloudflare DNS record IDs | Not visible in the Cloudflare dashboard — retrieved via the Cloudflare REST API before importing |
+
+After resolving all drift, `terraform plan` reports no changes.
+
+> *Importing existing infrastructure is significantly harder than writing Terraform for new resources. The import process exposed a lot of invisible configuration — portal defaults, Azure-managed tags, computed attributes, and provider bugs — that simply don't appear when clicking through the UI. Working through each issue one by one gave me a much deeper understanding of how every resource is actually configured under the hood.*
+
+### Secrets and Variable Management
+
+Sensitive values are kept out of source code using Terraform input variables marked as `sensitive`:
+
+```hcl
+variable "cosmosdb_connection_string" {
+  type      = string
+  sensitive = true
+}
+
+variable "app_insights_connection_string" {
+  type      = string
+  sensitive = true
+}
+```
+
+Values are stored locally in `terraform.tfvars`, which is excluded from version control via `.gitignore`. The Cloudflare API token is passed through the `CLOUDFLARE_API_TOKEN` environment variable and never written to any file.
+
+---
+
 ## Next Steps
-- Add resume download option  
-- Harden Azure permissions and roles (least privilege)  
-- Secure CI/CD pipeline: signed commits, dependency scanning, CodeQL, SBOM, Grype  
-- Add test/staging environments with PR deployments and smoke/end-to-end tests  
-- Implement monitoring and alerts with Application Insights, Azure Monitor, PagerDuty, and Slack  
-- Automate frontend and backend deployments using IaC, pipelines, and smoke tests
+
+- [ ] Add Application Insights resource to Terraform
+- [ ] Add resume PDF download option
+- [ ] Harden Azure RBAC — apply least privilege to the Service Principal
+- [ ] Secure CI/CD pipeline: signed commits, dependency scanning, CodeQL, SBOM
+- [ ] Add a plan-only Terraform workflow to validate infrastructure changes on PRs
+- [ ] Add staging environment with PR deployments and smoke tests
+- [ ] Implement monitoring and alerting with Application Insights and Azure Monitor
