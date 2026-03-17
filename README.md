@@ -33,7 +33,6 @@
    - [Resources Managed](#resources-managed)
    - [Importing Existing Infrastructure](#importing-existing-infrastructure)
    - [Secrets and Variable Management](#secrets-and-variable-management)
-10. [Next Steps](#next-steps)
 
 ---
 
@@ -450,13 +449,3 @@ variable "app_insights_connection_string" {
 Values are stored locally in `terraform.tfvars`, which is excluded from version control via `.gitignore`. The Cloudflare API token is passed through the `CLOUDFLARE_API_TOKEN` environment variable and never written to any file.
 
 ---
-
-## Next Steps
-
-- [ ] Add Application Insights resource to Terraform
-- [ ] Add resume PDF download option
-- [ ] Harden Azure RBAC — apply least privilege to the Service Principal
-- [ ] Secure CI/CD pipeline: signed commits, dependency scanning, CodeQL, SBOM
-- [ ] Add a plan-only Terraform workflow to validate infrastructure changes on PRs
-- [ ] Add staging environment with PR deployments and smoke tests
-- [ ] Implement monitoring and alerting with Application Insights and Azure Monitor
